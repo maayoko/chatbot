@@ -10,6 +10,20 @@
 <body>
     <h1>Hello to <strong>Chatbot</strong>!</h1>
     <p>Try to have a conversation with him.</p>
+    <br />
+    <div>
+        <div>
+            <input type="text" placeholder="Say something..." id="chat-input">
+        </div>
+        <div class="discussion">
+            <div class="discussion__inputs" id="chat-inputs">
+                <h4>User Inputs</h4>
+            </div>
+            <div class="discussion__responses" id="chat-responses">
+                <h4>Chatbot response</h4>
+            </div>
+        </div>
+    </div>
     <script src="{% static 'chat/js/main.js' %}"></script>
 </body>
 </html>

@@ -1,0 +1,12 @@
+.discussion {
+    display: flex;
+    max-width: 50%;
+}
+
+.discussion__inputs {
+    flex-basis: 50%;
+}
+
+.discussion__responses {
+    flex-basis: 50%
+}

@@ -31,15 +31,15 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         response = json.loads(text_data)
         event = response.get("event", None)
         message = response.get("message", None)
+        responseMsg = "You are stupid"
 
-        print(event, message)
-        # if event == 'MOVE':
-        #     # Send message to room group
-        #     await self.channel_layer.group_send(self.room_group_name, {
-        #         'type': 'send_message',
-        #         'message': message,
-        #         "event": "MOVE"
-        #     })
+        if event == 'MESSAGE':
+            # Send message to room group
+            await self.channel_layer.group_send(self.room_group_name, {
+                'type': 'send_message',
+                'message': responseMsg,
+                "event": "MESSAGE"
+            })
 
         if event == 'START':
             # Send message to room group
@@ -49,17 +49,18 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                 'event': "START"
             })
 
-        # if event == 'END':
-        #     # Send message to room group
-        #     await self.channel_layer.group_send(self.room_group_name, {
-        #         'type': 'send_message',
-        #         'message': message,
-        #         'event': "END"
-        #     })
+        if event == 'END':
+            # Send message to room group
+            await self.channel_layer.group_send(self.room_group_name, {
+                'type': 'send_message',
+                'message': message,
+                'event': "END"
+            })
 
     async def send_message(self, res):
         """ Receive message from room group """
         # Send message to WebSocket
+        print(res)
         await self.send(text_data=json.dumps({
             "payload": res,
         }))

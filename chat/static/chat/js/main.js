@@ -1,6 +1,38 @@
 const connectionString = 'ws://' + window.location.host + '/ws/chat/';
 const chatSocket = new WebSocket(connectionString);
 
+const inputElement = document.getElementById("chat-input");
+const chatInputsElement = document.getElementById("chat-inputs");
+const chatResponsesElement = document.getElementById("chat-responses");
+
+function onInputSubmit(event) {
+    enterKeyCode = 13;
+    if (event.keyCode === enterKeyCode) {
+        userInput = event.target.value
+
+        updateUserInputs(userInput);
+        chatSocket.send(JSON.stringify({
+            event: "MESSAGE",
+            message: userInput
+        }));
+        inputElement.value = "";
+    }
+}
+
+inputElement.addEventListener("keydown", onInputSubmit);
+
+function updateUserInputs(message) {
+    const p = document.createElement("p");
+    p.innerText = message;
+    chatInputsElement.appendChild(p);
+}
+
+function updateChatBotResponses(response) {
+    const p = document.createElement("p");
+    p.innerText = response;
+    chatResponsesElement.appendChild(p);
+}
+
 function connect() {
     chatSocket.onopen = function open() {
         console.log('WebSockets connection created.');
@@ -32,8 +64,8 @@ function connect() {
             case "END":
                 alert(message);
                 break;
-            case "MOVE":
-                alert(message);
+            case "MESSAGE":
+                updateChatBotResponses(message);
                 break;
             default:
                 console.log("No event")
