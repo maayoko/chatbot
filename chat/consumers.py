@@ -3,7 +3,9 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_code']
+        print("Connected")
+        # self.room_name = self.scope['url_route']['kwargs']['room_code']
+        self.room_name = "dde232"
         self.room_group_name = 'room_%s' % self.room_name
 
         # Join room group
@@ -29,13 +31,15 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         response = json.loads(text_data)
         event = response.get("event", None)
         message = response.get("message", None)
-        if event == 'MOVE':
-            # Send message to room group
-            await self.channel_layer.group_send(self.room_group_name, {
-                'type': 'send_message',
-                'message': message,
-                "event": "MOVE"
-            })
+
+        print(event, message)
+        # if event == 'MOVE':
+        #     # Send message to room group
+        #     await self.channel_layer.group_send(self.room_group_name, {
+        #         'type': 'send_message',
+        #         'message': message,
+        #         "event": "MOVE"
+        #     })
 
         if event == 'START':
             # Send message to room group
@@ -45,13 +49,13 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                 'event': "START"
             })
 
-        if event == 'END':
-            # Send message to room group
-            await self.channel_layer.group_send(self.room_group_name, {
-                'type': 'send_message',
-                'message': message,
-                'event': "END"
-            })
+        # if event == 'END':
+        #     # Send message to room group
+        #     await self.channel_layer.group_send(self.room_group_name, {
+        #         'type': 'send_message',
+        #         'message': message,
+        #         'event': "END"
+        #     })
 
     async def send_message(self, res):
         """ Receive message from room group """
