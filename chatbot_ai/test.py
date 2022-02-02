@@ -66,9 +66,6 @@ def main():
     datafile = os.path.join(os.getcwd(), "chatbot_ai", corpus, "formatted_movie_lines.txt")
     save_dir = os.path.join(os.getcwd(), "chatbot_ai", "model", "checkpoints")
 
-    print(corpus)
-    print(datafile)
-    print(save_dir)
     voc, pairs = loadPrepareData(corpus_name, datafile, args["max_length"])
     # Print some pairs to validate
     print("\npairs:")
