@@ -1,11 +1,15 @@
 import json
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from chatbot_ai.test import main, evaluateInput
+import uuid
+
+searcher, voc, args = main()
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         print("Connected")
         # self.room_name = self.scope['url_route']['kwargs']['room_code']
-        self.room_name = "dde232"
+        self.room_name = uuid.uuid4()
         self.room_group_name = 'room_%s' % self.room_name
 
         # Join room group
@@ -35,6 +39,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
         if event == 'MESSAGE':
             # Send message to room group
+            responseMsg = evaluateInput(message, searcher, voc, args)
             await self.channel_layer.group_send(self.room_group_name, {
                 'type': 'send_message',
                 'message': responseMsg,
@@ -60,7 +65,6 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def send_message(self, res):
         """ Receive message from room group """
         # Send message to WebSocket
-        print(res)
         await self.send(text_data=json.dumps({
             "payload": res,
         }))
