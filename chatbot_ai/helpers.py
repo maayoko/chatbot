@@ -4,7 +4,7 @@ import unicodedata
 from io import open
 import itertools
 
-from .modules import Voc
+from modules import Voc
 
 # Default word tokens
 PAD_token = 0  # Used for padding short sentences

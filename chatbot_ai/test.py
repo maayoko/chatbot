@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-from .helpers import indexesFromSentence, normalizeString, trimRareWords, loadPrepareData
+from helpers import indexesFromSentence, normalizeString, trimRareWords, loadPrepareData
 from datetime import datetime
-from .modules import EncoderRNN, LuongAttnDecoderRNN, GreedySearchDecoder
+from modules import EncoderRNN, LuongAttnDecoderRNN, GreedySearchDecoder
 import os
 
 # Default word tokens
@@ -36,13 +36,15 @@ def evaluateInput(input_sentence, searcher, voc, args):
         # Evaluate sentence
         output_words = evaluate(searcher, voc, input_sentence, args)
         # Format and print response sentence
-        output_words[:] = [x for x in output_words if not (x == 'EOS' or x == 'PAD')]
+        output_words[:] = [x for x in output_words if not (
+            x == 'EOS' or x == 'PAD')]
         output_words = ' '.join(output_words)
 
     except KeyError:
         output_words = "Error: Encountered unknown word."
 
     return output_words
+
 
 def main():
     args = {
@@ -54,7 +56,7 @@ def main():
         "encoder_n_layers": 2,
         "decoder_n_layers": 2,
         "device": torch.device("cuda"
-                                if torch.cuda.is_available() else 'cpu')
+                               if torch.cuda.is_available() else 'cpu')
     }
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
@@ -63,7 +65,8 @@ def main():
     # Load/Assemble voc and pairs
     corpus_name = "corpus"
     corpus = os.path.join(os.getcwd(), "chatbot_ai", "data", corpus_name)
-    datafile = os.path.join(os.getcwd(), "chatbot_ai", corpus, "formatted_movie_lines.txt")
+    datafile = os.path.join(os.getcwd(), "chatbot_ai",
+                            corpus, "formatted_movie_lines.txt")
     save_dir = os.path.join(os.getcwd(), "chatbot_ai", "model", "checkpoints")
 
     voc, pairs = loadPrepareData(corpus_name, datafile, args["max_length"])
@@ -82,7 +85,8 @@ def main():
     # Set checkpoint to load from; set to None if starting from scratch
     checkpoint_iter = args["checkpoint"]
     loadFilename = os.path.join(save_dir, model_name,
-                                '{}-{}_{}'.format(args["encoder_n_layers"], args["decoder_n_layers"], args["hidden_size"]),
+                                '{}-{}_{}'.format(args["encoder_n_layers"],
+                                                  args["decoder_n_layers"], args["hidden_size"]),
                                 '{}_checkpoint.tar'.format(checkpoint_iter))
 
     # Load model if a loadFilename is provided
@@ -102,7 +106,8 @@ def main():
     embedding = nn.Embedding(voc.num_words, args["hidden_size"])
     embedding.load_state_dict(embedding_sd)
     # Initialize encoder & decoder models
-    encoder = EncoderRNN(args["hidden_size"], embedding, args["encoder_n_layers"], dropout)
+    encoder = EncoderRNN(args["hidden_size"], embedding,
+                         args["encoder_n_layers"], dropout)
     decoder = LuongAttnDecoderRNN(args["attn_model"], embedding, args["hidden_size"], voc.num_words, args["decoder_n_layers"],
                                   dropout)
     encoder.load_state_dict(encoder_sd)
@@ -116,7 +121,8 @@ def main():
     decoder.eval()
 
     # Initialize search module
-    searcher = GreedySearchDecoder(encoder, decoder, args["device"], args["max_length"])
+    searcher = GreedySearchDecoder(
+        encoder, decoder, args["device"], args["max_length"])
 
     # Begin chatting (uncomment and run the following line to begin)
     return (searcher, voc, args)
