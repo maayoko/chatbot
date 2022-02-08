@@ -3,10 +3,10 @@ import torch.nn as nn
 from torch import optim
 import random
 from torch.utils.checkpoint import checkpoint
-from helpers import batch2TrainData, trimRareWords, loadPrepareData
+from .helpers import batch2TrainData, trimRareWords, loadPrepareData
 from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
-from modules import EncoderRNN, LuongAttnDecoderRNN
+from .modules import EncoderRNN, LuongAttnDecoderRNN
 
 # Default word tokens
 PAD_token = 0  # Used for padding short sentences
@@ -17,7 +17,8 @@ EOS_token = 2  # End-of-sentence token
 # Average negative log likelihood of the elements that correspond to a 1 in the mask tensor
 def maskNLLLoss(inp, target, mask, args):
     nTotal = mask.sum()
-    crossEntropy = -torch.log(torch.gather(inp, 1, target.view(-1, 1)).squeeze(1))
+    crossEntropy = - \
+        torch.log(torch.gather(inp, 1, target.view(-1, 1)).squeeze(1))
     loss = crossEntropy.masked_select(mask).mean()
     loss = loss.to(args.device)
     return loss, nTotal.item()
@@ -46,14 +47,16 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
 
     # Create initial decoder input (start with SOS tokens for each sentence)
     # noinspection PyArgumentList
-    decoder_input = torch.LongTensor([[SOS_token for _ in range(args.batch_size)]])
+    decoder_input = torch.LongTensor(
+        [[SOS_token for _ in range(args.batch_size)]])
     decoder_input = decoder_input.to(args.device)
 
     # Set initial decoder hidden state to the encoder's final hidden state
     decoder_hidden = encoder_hidden[:decoder.n_layers]
 
     # Determine if we are using teacher forcing this iteration
-    use_teacher_forcing = True if random.random() < args.teacher_forcing_ratio else False
+    use_teacher_forcing = True if random.random(
+    ) < args.teacher_forcing_ratio else False
 
     # Forward batch of sequences through decoder one time step at a time
     if use_teacher_forcing:
@@ -64,7 +67,8 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
             # Teacher forcing: next input is current target
             decoder_input = target_variable[t].view(1, -1)
             # Calculate and accumulate loss
-            mask_loss, nTotal = maskNLLLoss(decoder_output, target_variable[t], mask[t],args)
+            mask_loss, nTotal = maskNLLLoss(
+                decoder_output, target_variable[t], mask[t], args)
             loss += mask_loss
             print_losses.append(mask_loss.item() * nTotal)
             n_totals += nTotal
@@ -75,10 +79,12 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
             )
             # No teacher forcing: next input is decoder's own current output
             _, topi = decoder_output.topk(1)
-            decoder_input = torch.LongTensor([[topi[i][0] for i in range(args.batch_size)]])
+            decoder_input = torch.LongTensor(
+                [[topi[i][0] for i in range(args.batch_size)]])
             decoder_input = decoder_input.to(args.device)
             # Calculate and accumulate loss
-            mask_loss, nTotal = maskNLLLoss(decoder_output, target_variable[t], mask[t], args)
+            mask_loss, nTotal = maskNLLLoss(
+                decoder_output, target_variable[t], mask[t], args)
             loss += mask_loss
             print_losses.append(mask_loss.item() * nTotal)
             n_totals += nTotal
@@ -177,13 +183,15 @@ def main(args):
 
     # Set checkpoint to load from; set to None if starting from scratch
     loadFilename = None
-    
+
     print('Building encoder and decoder ...')
     # Initialize word embeddings
     embedding = nn.Embedding(voc.num_words, args.hidden_size)
     # Initialize encoder & decoder models
-    encoder = EncoderRNN(args.hidden_size, embedding, args.encoder_n_layers, dropout)
-    decoder = LuongAttnDecoderRNN(args.attn_model, embedding, args.hidden_size, voc.num_words, args.decoder_n_layers, dropout)
+    encoder = EncoderRNN(args.hidden_size, embedding,
+                         args.encoder_n_layers, dropout)
+    decoder = LuongAttnDecoderRNN(
+        args.attn_model, embedding, args.hidden_size, voc.num_words, args.decoder_n_layers, dropout)
     # Use appropriate args.device
     encoder = encoder.to(args.device)
     decoder = decoder.to(args.device)
@@ -203,7 +211,8 @@ def main(args):
     # Initialize optimizers
     print('Building optimizers ...')
     encoder_optimizer = optim.Adam(encoder.parameters(), lr=args.lr)
-    decoder_optimizer = optim.Adam(decoder.parameters(), lr=args.lr * decoder_learning_ratio)
+    decoder_optimizer = optim.Adam(
+        decoder.parameters(), lr=args.lr * decoder_learning_ratio)
 
     # If you have cuda, configure cuda to call
     for state in encoder_optimizer.state.values():
@@ -239,9 +248,9 @@ if __name__ == '__main__':
                         help='type of attention model: (dot/general/concat)')
     parser.add_argument('--batch_size', type=int, default=64,
                         help='batch size (default: 64)')
-    parser.add_argument('--min_count',type=int, default=3,
+    parser.add_argument('--min_count', type=int, default=3,
                         help='min_count of a word')
-    parser.add_argument('--max_length',type=int, default=10,
+    parser.add_argument('--max_length', type=int, default=10,
                         help='max_length of a sentence')
     parser.add_argument('--epochs', type=int, default=5000,
                         help='number of epochs (default: 5000)')

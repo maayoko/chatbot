@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-from helpers import indexesFromSentence, normalizeString, trimRareWords, loadPrepareData
+from .helpers import indexesFromSentence, normalizeString, trimRareWords, loadPrepareData
 from datetime import datetime
-from modules import EncoderRNN, LuongAttnDecoderRNN, GreedySearchDecoder
+from .modules import EncoderRNN, LuongAttnDecoderRNN, GreedySearchDecoder
 import os
 
 # Default word tokens
