@@ -14,7 +14,7 @@ ARG POSTGRES_PORT
 
 WORKDIR /code
 COPY requirements.txt /code/
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 COPY . /code/
 # collect static files
 RUN python manage.py collectstatic --noinput
