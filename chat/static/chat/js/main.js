@@ -11,6 +11,7 @@
             userInput = event.target.value
 
             updateUserInputs(userInput);
+            showThreeDots();
             chatSocket.send(JSON.stringify({
                 event: "MESSAGE",
                 message: userInput
@@ -35,6 +36,24 @@
         div.innerText = response;
         chatElement.appendChild(div);
         chatElement.scrollTop = chatElement.scrollHeight - chatElement.clientHeight;
+    }
+
+    function showThreeDots() {
+        const div = document.createElement("div");
+        div.className = "message stark dots";
+        div.innerHTML = `
+            <div class="typing typing-1"></div>
+            <div class="typing typing-2"></div>
+            <div class="typing typing-3"></div>
+        `.trim()
+
+        chatElement.appendChild(div);
+        chatElement.scrollTop = chatElement.scrollHeight - chatElement.clientHeight;
+    }
+
+    function removeThreeDots() {
+        const dots = document.querySelector(".dots")
+        chatElement.removeChild(dots);
     }
 
     function connect() {
@@ -63,12 +82,13 @@
             let event = data["event"];
             switch (event) {
                 case "START":
-                    alert(message);
+                    console.log(message);
                     break;
                 case "END":
-                    alert(message);
+                    console.log(message);
                     break;
                 case "MESSAGE":
+                    removeThreeDots();
                     updateChatBotResponses(message);
                     break;
                 default:
