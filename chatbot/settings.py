@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+import dj_database_url
+from os import environ as env
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-sx7lw3dvjzru9_g0*+=5*%n^vmpy%hf+@5@z$0b$#88)ky(d#9'
+SECRET_KEY = env.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(env.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 
 # Application definition
@@ -37,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'chat',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -67,7 +72,14 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'chatbot.wsgi.application'
+# WSGI_APPLICATION = 'chatbot.wsgi.application'
+ASGI_APPLICATION = "chat.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 
 # Database
@@ -75,10 +87,23 @@ WSGI_APPLICATION = 'chatbot.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env.get('POSTGRES_NAME'),
+        'USER': env.get('POSTGRES_USER'),
+        'PASSWORD': env.get('POSTGRES_PASSWORD'),
+        'HOST': env.get("POSTGRES_HOST"),
+        'PORT': env.get("POSTGRES_PORT")
     }
 }
+
+DATABASE_URL = env.get('DATABASE_URL')
+# postgres://USER:PASSWORD@HOST:PORT/NAME
+if DATABASE_URL == None:
+    DATABASE_URL = f"postgres://{env.get('POSTGRES_USER')}:{env.get('POSTGRES_PASSWORD')}@{env.get('POSTGRES_HOST')}:{env.get('POSTGRES_PORT')}/{env.get('POSTGRES_NAME')}"
+
+db_from_env = dj_database_url.config(
+    default=DATABASE_URL, conn_max_age=500)
+DATABASES['default'].update(db_from_env)
 
 
 # Password validation
@@ -116,6 +141,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

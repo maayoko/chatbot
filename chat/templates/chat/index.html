@@ -1,0 +1,17 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
+     <link rel='stylesheet' href='{% static "/chat/css/main.css" %}'>
+</head>
+<body>
+    <h1>Hello to <strong>Chatbot</strong>!</h1>
+    <p>Try to have a conversation with him.</p>
+    {% include "chat/chatbox.html" %}
+    <script src="{% static 'chat/js/main.js' %}"></script>
+</body>
+</html>
